@@ -1,4 +1,11 @@
 use Libraries.Game.Game
+use Libraries.Game.Graphics.AmbientLight
+use Libraries.Game.Graphics.DirectionalLight
+use Libraries.Game.Graphics.Model
+use Libraries.Game.Graphics.Color
+use Libraries.Game.InputMonitor
+use Libraries.Compute.Vector3
+use Libraries.Interface.Events.KeyboardEvent
 
 /*
     This is a default class for creating a game in Quorum. Note that the Main 
@@ -8,11 +15,21 @@ use Libraries.Game.Game
     played. 
 */
 class Main is Game
+AmbientLight al
+DirectionalLight dl
+Model cube
+Model ground
+Color color
+InputMonitor im
+Vector3 force
+KeyboardEvent button
+
     /*
         This action, Main, starts our computer program. In Quorum, programs always
         begin from Main.
     */
     action Main
+        UseDesktopResolution()
         StartGame()
     end
 
@@ -23,6 +40,29 @@ class Main is Game
         or a Libraries.Interface.TextBox for gathering user input in a game.
     */
     action CreateGame
+        EnablePhysics3D(true)
+
+        cube:LoadBox(1,1,1,color:Teal())
+        cube:SetPosition(0,2,0)
+        Add(cube)
+        cube:EnablePhysics(true)
+        cube:SetResponsive()
+        cube:SetRestitution(0.5)
+
+        ground:LoadBox(15,1,20,color:Cyan())
+        ground:SetPosition(0,-2,0)
+        Add(ground)
+        ground:EnablePhysics(true)
+        ground:SetUnmovable()
+
+        al:SetColor(0.4,0.4,0.4,1)
+        SetAmbientLight(al)
+        
+        dl:SetColor(0.8,0.8,0.8,1)
+        dl:SetDirection(GetCamera3D():GetDirection())
+        Add(dl)
+
+        SetGravity3D(0,-10,0)
     end
 
     /*
@@ -32,5 +72,28 @@ class Main is Game
         or to make creatures jump.
     */
     action Update(number seconds)
+        if im:IsKeyPressed(button:UP)
+            force:Set(0,11,0)
+            cube:ApplyForceToCenter(force)
+        end
+        
+        if im:IsKeyPressed(button:DOWN)
+            force:Set(0,-11,0)
+            cube:ApplyForceToCenter(force)
+        end
+
+        if im:IsKeyPressed(button:RIGHT)
+            force:Set(2,0,0)
+            cube:ApplyForceToCenter(force)
+        end
+        
+        if im:IsKeyPressed(button:LEFT)
+            force:Set(-2,0,0)
+            cube:ApplyForceToCenter(force)
+        end
+
+        if im:IsKeyPressed(button:X)
+            Exit()
+        end
     end
 end
